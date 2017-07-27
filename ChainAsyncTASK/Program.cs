@@ -15,10 +15,10 @@ namespace ChainAsyncTASK
     {
         internal class ChainAsyncTASK
         {
-            internal delegate void RaiseEventDeledate(TimeSpan dellay, CancellationToken token);
+            internal delegate Task RaiseEventDeledate(TimeSpan dellay, CancellationToken token);
             private static event RaiseEventDeledate _StartTasksEvent = null;
-            private void CooldownEventHandlerAsync(TimeSpan dellay, CancellationToken token) {
-                Task mydel = Task.Run(async () => {
+            private async Task CooldownEventHandlerAsync(TimeSpan dellay, CancellationToken token) {
+                await Task.Run(async () => {
                     var timer = Stopwatch.StartNew();
                     Console.WriteLine($"\r\nFirst method start.Going to sleep {dellay.Seconds} sec");
                     await Task.Delay(dellay, token);
@@ -51,13 +51,14 @@ namespace ChainAsyncTASK
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 var _cooldownTimeout = Random.Next(MinSleepSeconds, MaxSleepSeconds);
                 Console.WriteLine($"\r\nCooldown...Waiting for {_cooldownTimeout} sec");
-                CallCooldownEventHandlerAsync(TimeSpan.FromSeconds(_cooldownTimeout), token, timer);
+                await CallCooldownEventHandlerAsync(TimeSpan.FromSeconds(_cooldownTimeout), token, timer);
             }
 
-            private void CallCooldownEventHandlerAsync(TimeSpan dellay, CancellationToken token, Stopwatch timer)
+            private async Task CallCooldownEventHandlerAsync(TimeSpan dellay, CancellationToken token, Stopwatch timer)
             {
                 timer.Restart();
-                Thread.Sleep(dellay);
+                //Thread.Sleep(dellay);
+                await Task.Delay(dellay);
                 Console.WriteLine($"\r\nElapsed {timer.Elapsed.Seconds} sec. Cooldown finish. Let's go back to work");
                 Console.ResetColor();
                 _StartTasksEvent?.Invoke(dellay, token);
